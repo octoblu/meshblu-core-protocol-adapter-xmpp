@@ -17,7 +17,7 @@ class Connect
     async.series [
       @startServer
       @createConnection
-      # @authenticateConnection
+      @authenticateConnection
     ], (error) =>
       return callback error if error?
       callback null,

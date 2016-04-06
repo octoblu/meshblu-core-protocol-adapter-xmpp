@@ -7,11 +7,11 @@ describe 'on: authenticate', ->
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things
-      done()
+      @connection.connection.on 'online', =>
+        done()
 
   afterEach (done) ->
-    @sut.server.end done
-    # @connect.shutItDown done
+    @connect.shutItDown done
 
   it 'should exist', ->
     expect(@connection).to.exist

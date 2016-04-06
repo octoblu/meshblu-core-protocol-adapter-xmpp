@@ -11,32 +11,27 @@ describe 'on: authenticate', ->
       done()
 
   afterEach (done) ->
-    @connection.close()
     @connect.shutItDown done
 
   beforeEach (done) ->
     badClient = new MeshbluXmpp
       hostname: 'localhost'
       port: 0xcafe
-      uuid: 'masseuse'
-      token: 'assassin'
+      uuid: 'nothing'
+      token: 'idunno'
 
-    done()
+    badClient.connect (@error) =>
+      done()
 
-    # badClient.connect =>
-    #   console.log 'connected'
+    @jobManager.getRequest ['request'], (error, request) =>
+      return callback error if error?
 
-    # @jobManager.getRequest ['request'], (error, request) =>
-    #   return callback error if error?
-    #
-    #   response =
-    #     metadata:
-    #       responseId: request.metadata.responseId
-    #       code: 403
-    #
-    #   console.log {response}
-    #
-    #   @jobManager.createResponse 'response', response, =>
+      response =
+        metadata:
+          responseId: request.metadata.responseId
+          code: 403
+
+      @jobManager.createResponse 'response', response, =>
 
   it 'should have an error', ->
     expect(@error).to.exist

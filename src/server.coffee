@@ -33,24 +33,21 @@ class Server
       domain: 'meshblu.octoblu.com'
       port: @port
 
-    # @server.on 'error', @panic
+    @server.on 'error', @panic
 
-    # @jobManager = new RedisPooledJobManager {
-    #   jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-coap'
-    #   jobLogType: 'meshblu-core-protocol-adapter-coap:request'
-    #   @jobTimeoutSeconds
-    #   @jobLogQueue
-    #   @jobLogRedisUri
-    #   @jobLogSampleRate
-    #   @maxConnections
-    #   @redisUri
-    #   @namespace
-    # }
+    @jobManager = new RedisPooledJobManager {
+      jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-coap'
+      jobLogType: 'meshblu-core-protocol-adapter-coap:request'
+      @jobTimeoutSeconds
+      @jobLogQueue
+      @jobLogRedisUri
+      @jobLogSampleRate
+      @maxConnections
+      @redisUri
+      @namespace
+    }
 
-    @server.on 'connection', (client) =>
-      client.on 'authenticate', (opts, callback) =>
-        return callback null, opts
-
+    @server.on 'connection', @onConnection
     @server.on 'listening', callback
 
   stop: (callback) =>

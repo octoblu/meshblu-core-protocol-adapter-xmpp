@@ -9,22 +9,20 @@ class XmppHandler
 
   # API endpoints
   onAuthenticate: (opts, callback) =>
-    return callback null, opts
+    {username, password} = opts
+    @auth =
+      uuid: username
+      token: password
 
-    #
-    # @auth =
-    #   uuid: username
-    #   token: password
-    #
-    # request =
-    #   metadata:
-    #     auth: @auth
-    #     jobType: 'Authenticate'
-    #
-    # @jobManager.do 'request', 'response', request, (error, response) =>
-    #   return callback error if error?
-    #   if response.metadata.code == 204
-    #     return callback null, {username, password}
-    #   callback false
+    request =
+      metadata:
+        auth: @auth
+        jobType: 'Authenticate'
+
+    @jobManager.do 'request', 'response', request, (error, response) =>
+      return callback error if error?
+      if response.metadata.code == 204
+        return callback null, opts
+      callback false
 
 module.exports = XmppHandler
