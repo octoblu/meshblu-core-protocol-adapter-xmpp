@@ -1,0 +1,34 @@
+{
+  "name": "meshblu-core-protocol-adapter-xmpp",
+  "version": "1.0.0",
+  "description": "Meshblu Core Protocol Adapter for XMPP",
+  "main": "index.js",
+  "scripts": {
+    "test": "istanbul cover _mocha -- -R spec --require coffee-coverage/register-istanbul"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/octoblu/meshblu-core-protocol-adapter-xmpp.git"
+  },
+  "keywords": [
+    "meshblu",
+    "protocol",
+    "xmpp"
+  ],
+  "author": "Octoblu, <serveradmin@octoblu.com> (https://octoblu.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/octoblu/meshblu-core-protocol-adapter-xmpp/issues"
+  },
+  "homepage": "https://github.com/octoblu/meshblu-core-protocol-adapter-xmpp#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coffee-coverage": "^1.0.1",
+    "coffee-script": "^1.10.0",
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.5",
+    "mocha-istanbul": "^0.2.0",
+    "sinon": "^1.17.3",
+    "sinon-chai": "^2.8.0"
+  }
+}
