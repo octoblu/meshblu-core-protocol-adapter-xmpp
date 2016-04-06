@@ -33,26 +33,28 @@ class Server
       domain: 'meshblu.octoblu.com'
       port: @port
 
-    @server.on 'error', (error) =>
-      console.error "Server error:", error.stack
+    # @server.on 'error', @panic
 
-    @jobManager = new RedisPooledJobManager {
-      jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-coap'
-      jobLogType: 'meshblu-core-protocol-adapter-coap:request'
-      @jobTimeoutSeconds
-      @jobLogQueue
-      @jobLogRedisUri
-      @jobLogSampleRate
-      @maxConnections
-      @redisUri
-      @namespace
-    }
+    # @jobManager = new RedisPooledJobManager {
+    #   jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-coap'
+    #   jobLogType: 'meshblu-core-protocol-adapter-coap:request'
+    #   @jobTimeoutSeconds
+    #   @jobLogQueue
+    #   @jobLogRedisUri
+    #   @jobLogSampleRate
+    #   @maxConnections
+    #   @redisUri
+    #   @namespace
+    # }
 
-    @server.on 'connection', @onConnection
+    @server.on 'connection', (client) =>
+      client.on 'authenticate', (opts, callback) =>
+        return callback null, opts
+
     @server.on 'listening', callback
 
   stop: (callback) =>
-    @server.close callback
+    @server.end callback
 
   onConnection: (client) =>
     xmppHandler = new XmppHandler {client, @jobManager}

@@ -17,7 +17,7 @@ class Connect
     async.series [
       @startServer
       @createConnection
-      @authenticateConnection
+      # @authenticateConnection
     ], (error) =>
       return callback error if error?
       callback null,
@@ -30,10 +30,7 @@ class Connect
 
   shutItDown: (callback) =>
     @connection.close()
-
-    async.series [
-      async.apply @sut.stop
-    ], callback
+    @sut.stop callback
 
   startServer: (callback) =>
     @sut = new Server
@@ -54,9 +51,9 @@ class Connect
       port: 0xcafe
       uuid: 'masseuse'
       token: 'assassin'
-      protocol: 'http'
 
-    @connection.connect =>
+    @connection.connect (error) =>
+      throw error if error?
     callback()
 
   authenticateConnection: (callback) =>

@@ -10,46 +10,8 @@ describe 'on: authenticate', ->
       done()
 
   afterEach (done) ->
-    @connect.shutItDown done
+    @sut.server.end done
+    # @connect.shutItDown done
 
-  beforeEach ->
-    request =
-      metadata:
-        uuid: 'to-uuid'
-        token: 'to-ken'
-      data: {}
-
-  it 'should', ->
-
-  #   @connection.send 'authenticate', request
-  #
-  # it 'should create a request', (done) ->
-  #   @jobManager.getRequest ['request'], (error,request) =>
-  #     return done error if error?
-  #     return done new Error('Request timeout') unless request?
-  #     expect(request.metadata.jobType).to.deep.equal 'Authenticate'
-  #     done()
-  #
-  # describe 'when the dispatcher responds', ->
-  #   beforeEach (done) ->
-  #     @connection.once 'authenticate', (@response) => done()
-  #
-  #     @jobManager.getRequest ['request'], (error,request) =>
-  #       return done error if error?
-  #       return done new Error('Request timeout') unless request?
-  #       @responseId = request.metadata.responseId
-  #       response =
-  #         metadata:
-  #           responseId: request.metadata.responseId
-  #           code: 204
-  #         data:
-  #           uuid: 'OHM MY!! WATT HAPPENED?? VOLTS'
-  #       @jobManager.createResponse 'response', response, (error) =>
-  #         return done error if error?
-  #
-  #   it 'should yield the response', ->
-  #     expect(@response).to.deep.equal
-  #       metadata:
-  #         responseId: @responseId
-  #         code: 204
-  #       rawData: '{"uuid":"OHM MY!! WATT HAPPENED?? VOLTS"}'
+  it 'should exist', ->
+    expect(@connection).to.exist
