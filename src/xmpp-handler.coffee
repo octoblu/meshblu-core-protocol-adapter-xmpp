@@ -1,10 +1,12 @@
 _         = require 'lodash'
 async     = require 'async'
 debug     = require('debug')('meshblu-core-protocol-adapter-xmpp:xmpp-handler')
+http      = require 'http'
 xmpp      = require 'node-xmpp-server'
 ltx       = require 'ltx'
 jsontoxml = require 'jsontoxml'
 xml2js    = require('xml2js').parseString
+http2xmpp = require './helpers/http2xmpp'
 
 class XmppHandler
   constructor: ({@client, @jobManager}) ->
@@ -47,7 +49,8 @@ class XmppHandler
 
   # internals
   _sendError: ({request, response}) =>
-    responseNode = ltx.parse jsontoxml {response}
+    code = response.metadata.code
+
     @client.send(new xmpp.Stanza('iq',
       type: 'error'
       to: request.attrs.from
@@ -56,13 +59,13 @@ class XmppHandler
     )
     .cnode(request.getChild('request')).up()
     .c('error').attr('type', 'cancel')
-      .c('remote-server-timeout').attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').up()
+      .c(http2xmpp code).attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').up()
       .c('text').attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').attr('xml:lang', 'en-US')
-        .t('Gateway Timeout').up()
+        .t(http.STATUS_CODES[code]).up()
       .c('response').attr('xmlns', 'meshblu-xmpp:job-manager:response')
         .c('metadata')
           .c('code')
-            .t('504'))
+            .t(code))
 
   _sendResponse: ({request, response}) =>
     responseNode = ltx.parse jsontoxml {response}

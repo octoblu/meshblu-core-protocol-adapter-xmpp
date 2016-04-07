@@ -69,3 +69,30 @@ describe 'on: status', ->
         return done error if error?
         expect(response.error).to.contain.keys 'remote-server-timeout'
         done()
+
+  describe 'when the job responds with a 500', ->
+    beforeEach (done) ->
+      @connection.status (@error) =>
+        done()
+
+      @jobManager.getRequest ['request'], (error, @request) =>
+        return callback error if error?
+
+        response =
+          metadata:
+            responseId: @request.metadata.responseId
+            code: 500
+
+        @jobManager.createResponse 'response', response, =>
+
+    it 'should have the correct jobType', ->
+      expect(@request.metadata.jobType).to.equal 'GetStatus'
+
+    it 'should yield a "Internal Server Error" error', ->
+      expect(=> throw @error).to.throw 'Internal Server Error'
+
+    it 'should respond with an XMPP "internal-server-error"', (done) ->
+      xml2js @error.response, explicitArray: false, (error, response) =>
+        return done error if error?
+        expect(response.error).to.contain.keys 'internal-server-error'
+        done()
