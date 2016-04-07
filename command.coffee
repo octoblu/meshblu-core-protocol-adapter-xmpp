@@ -8,6 +8,7 @@ class Command
       aliasServerUri:               process.env.ALIAS_SERVER_URI
       redisUri:                     process.env.REDIS_URI
       namespace:                    process.env.NAMESPACE || 'meshblu'
+      firehoseNamespace:            process.env.FIREHOSE_NAMESPACE || 'messages'
       jobTimeoutSeconds:            parseInt(process.env.JOB_TIMEOUT_SECONDS || 30)
       maxConnections:               parseInt(process.env.CONNECTION_POOL_MAX_CONNECTIONS || 100)
       disableLogging:               process.env.DISABLE_LOGGING == "true"

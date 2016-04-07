@@ -42,6 +42,7 @@ class Connect
       jobLogRedisUri: 'redis://localhost:6379'
       redisUri: 'redis://localhost:6379'
       namespace: 'ns'
+      firehoseNamespace: 'messages'
 
     @sut.run callback
 

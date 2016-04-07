@@ -9,10 +9,44 @@ xml2js    = require('xml2js').parseString
 http2xmpp = require './helpers/http2xmpp'
 
 class XmppHandler
-  constructor: ({@client, @jobManager}) ->
+  constructor: ({@client, @jobManager, @hydrantManagerFactory}) ->
   initialize: =>
     @client.on 'authenticate', @onAuthenticate
     @client.on 'stanza', @onStanza
+    @client.on 'close', @onClose
+
+  onClose: =>
+    @firehose?.close()
+
+  onFirehose: (request) =>
+    @firehose = @hydrantManagerFactory.build()
+    @firehose.on 'message', @onMessage
+
+    @firehose.connect uuid: @auth.uuid, (error) =>
+      throw error if error?
+
+  onMessage: (message) =>
+    if message.metadata?.route?
+      route = message.metadata?.route
+      delete message.metadata.route
+      message.metadata.route ?= []
+      _.each route, (hop) =>
+        message.metadata.route.push {
+          name: 'hop'
+          attrs:
+            to: hop.to
+            from: hop.from
+            type: hop.type
+        }
+
+    metadataNode = ltx.parse jsontoxml {metadata: message.metadata}
+    rawDataNode = ltx.parse jsontoxml {'raw-data': message.rawData}
+
+    @client.send new xmpp.Stanza('message',
+      to: "#{@auth.uuid}@meshblu.octoblu.com"
+      from: 'meshblu.octoblu.com'
+      type: 'normal'
+    ).cnode(metadataNode).up().cnode(rawDataNode)
 
   onStanza: (request) =>
     metadata = request.getChild('request').getChild('metadata')
@@ -44,6 +78,7 @@ class XmppHandler
       return callback false unless response? # replace with error
 
       if response.metadata.code == 204
+        @onFirehose()
         return callback null, opts
       callback false
 

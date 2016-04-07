@@ -4,6 +4,8 @@ redis                 = require 'ioredis'
 RedisNS               = require '@octoblu/redis-ns'
 debug                 = require('debug')('meshblu-core-protocol-adapter-xmpp:server')
 RedisPooledJobManager = require 'meshblu-core-redis-pooled-job-manager'
+HydrantManagerFactory = require 'meshblu-core-manager-hydrant/factory'
+UuidAliasResolver     = require 'meshblu-uuid-alias-resolver'
 PackageJSON           = require '../package.json'
 xmpp                  = require 'node-xmpp-server'
 XmppHandler           = require './xmpp-handler'
@@ -12,7 +14,7 @@ class Server
   constructor: (options)->
     {@disableLogging, @port, @aliasServerUri} = options
     {@redisUri, @namespace, @jobTimeoutSeconds} = options
-    {@maxConnections} = options
+    {@maxConnections, @firehoseNamespace} = options
     {@jobLogRedisUri, @jobLogQueue, @jobLogSampleRate} = options
     @panic 'missing @jobLogQueue', 2 unless @jobLogQueue?
     @panic 'missing @jobLogRedisUri', 2 unless @jobLogRedisUri?
@@ -47,6 +49,10 @@ class Server
       @namespace
     }
 
+    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
+    uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
+    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, namespace: @firehoseNamespace}
+
     @server.on 'connection', @onConnection
     @server.on 'listening', callback
 
@@ -54,7 +60,7 @@ class Server
     @server.end callback
 
   onConnection: (client) =>
-    xmppHandler = new XmppHandler {client, @jobManager}
+    xmppHandler = new XmppHandler {client, @jobManager, @hydrantManagerFactory}
     xmppHandler.initialize()
 
 module.exports = Server
