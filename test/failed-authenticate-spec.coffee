@@ -1,8 +1,14 @@
-_       = require 'lodash'
-Connect = require './connect'
+_           = require 'lodash'
+Connect     = require './connect'
 MeshbluXmpp = require 'meshblu-xmpp'
+redis       = require 'ioredis'
+RedisNS     = require '@octoblu/redis-ns'
 
-describe 'on: authenticate', ->
+describe 'on: failed authenticate', ->
+  beforeEach (done) ->
+    client = new RedisNS 'ns', redis.createClient()
+    client.del 'request:queue', done
+
   beforeEach 'on connect', (done) ->
     @connect = new Connect
     @connect.connect (error, things) =>

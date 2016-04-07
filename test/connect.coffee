@@ -11,7 +11,7 @@ class Connect
   constructor: ({@redisUri}={}) ->
     @jobManager = new JobManager
       client: new RedisNS 'ns', redis.createClient(@redisUri)
-      timeoutSeconds: 1
+      timeoutSeconds: 10
 
   connect: (callback) =>
     async.series [
@@ -26,7 +26,7 @@ class Connect
         device: {uuid: 'masseuse', token: 'assassin'}
         jobManager: new JobManager
           client: new RedisNS 'ns', redis.createClient(@redisId)
-          timeoutSeconds: 1
+          timeoutSeconds: 10
 
   shutItDown: (callback) =>
     @connection.close()
@@ -35,7 +35,7 @@ class Connect
   startServer: (callback) =>
     @sut = new Server
       port: 0xcafe
-      jobTimeoutSeconds: 1
+      jobTimeoutSeconds: 10
       jobLogQueue: 'sample-rate:1.00'
       jobLogSampleRate: '0.00'
       maxConnections: 100
@@ -59,6 +59,8 @@ class Connect
   authenticateConnection: (callback) =>
     @jobManager.getRequest ['request'], (error, @request) =>
       return callback error if error?
+
+      return callback new Error 'Invalid Response' unless @request?
 
       response =
         metadata:
