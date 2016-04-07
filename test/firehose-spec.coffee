@@ -32,9 +32,18 @@ describe 'on: message', ->
           from: 'another'
           type: 'message.boo'
         ]
-      rawData: nonce: 'nonce'
+      rawData: '{"nonce": "nonce"}'
     }
     @firehose.publish 'masseuse', JSON.stringify message
 
   it 'should have a message', ->
-    expect(@message).to.equal '<message to="masseuse@meshblu.octoblu.com" from="meshblu.octoblu.com" type="normal" xmlns:stream="http://etherx.jabber.org/streams"><metadata><route><hop to="someone" from="another" type="message.boo"/></route></metadata><raw-data><nonce>nonce</nonce></raw-data></message>'
+    expectedMessage =
+      metadata:
+        route: [
+          to: 'someone'
+          from: 'another'
+          type: 'message.boo'
+        ]
+      data: nonce: 'nonce'
+
+    expect(@message).to.deep.equal expectedMessage
