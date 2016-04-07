@@ -14,11 +14,8 @@ class XmppHandler
 
   onStanza: (request) =>
     metadata = request.getChild('request').getChild('metadata')
-    options =
-      explicitArray: false
-      mergeAttrs: true
 
-    xml2js metadata.toString(), options, (error, job) =>
+    xml2js metadata.toString(), explicitArray: false, (error, job) =>
       job.metadata.auth = @auth
       delete job.metadata.responseId
       job.rawData = request.getChild('request').getChild('rawData')?.getText()
