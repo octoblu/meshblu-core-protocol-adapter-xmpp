@@ -8,11 +8,3 @@ before_script:
 - npm install -g codeclimate-test-reporter
 after_script:
 - codeclimate-test-reporter < coverage/lcov.info
-deploy:
-  provider: npm
-  email: serveradmin@octoblu.com
-  api_key:
-    secure: uO8thSe6JIXLwZULV5mvFE+D1e+XBVcxdVvqsUWCkotyzouNVY1/mrwQdS1wNlEZaRdpPVkYe6tmV2HyrorSlMU42cyFmEbv+s46rQUs6zUo0HjfstA2qYYmdKbyCKTpxDSfENE69OSWvHouElF3F6kH3RW8YCEa4yqpR7jepr9M22mPmRVwJ+a8u7boCdX48nC55ZgxEoLYz83xPTELF7d+o7RLHPyLYVlQLl14rxsak9eWzI1OD89dIiqIdEFjuJ3iKm5fjW4sZJd0Y++IUR/sUCoY2vojxcTSX3APLBjhMmKZRfg/gAR97M9YumgDpBDzdXDDWxEIXJojkEk6HDR4xPXXXQW72vPSyJNkz7e381qZbR5dSQNhe+AsvLGpYefQAq0k8GbB96J/OjGdVzzykCjVPTLgzYyqYCYDubIS28yhDvkGi6MyT9BsCX1pBvhYL0yW2EIBCYKhg1A8hnl+FHHqt/GxD8b3peo6/Xoo4reJKuGwq2mUBaPqTnw71PMBS+b4bSlRDS2k6riQOTNKI7xVYSdIB4YQhmelnHiRh41wSwEHxirJ3AvD+SgMTgQbDQWPikgFw8h0sHq3deZHKL6OWJ9eK4pE6qoHsXOCB0EhUxPB92/EZ+VAInczURoCYwOfdQxJ/5zT2XjwbhVlvVXNvn6/FQ/hXFho518=
-  on:
-    tags: true
-    branches: true
