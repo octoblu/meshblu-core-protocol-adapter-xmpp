@@ -51,7 +51,7 @@ class Server
 
     uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, namespace: @firehoseNamespace}
+    @hydrantManagerFactory = new HydrantManagerFactory {@redisUri, uuidAliasResolver, namespace: @firehoseNamespace}
 
     @server.on 'connection', @onConnection
     @server.on 'listening', callback
