@@ -18,12 +18,10 @@ class XmppHandler
   onClose: =>
     @firehose?.close()
 
-  onFirehose: (request) =>
+  onFirehose: (callback) =>
     @firehose = @hydrantManagerFactory.build()
     @firehose.on 'message', @onMessage
-
-    @firehose.connect uuid: @auth.uuid, (error) =>
-      throw error if error?
+    @firehose.connect uuid: @auth.uuid, callback
 
   onMessage: (message) =>
     if message.metadata?.route?
@@ -77,10 +75,12 @@ class XmppHandler
       return callback error if error?
       return callback false unless response? # replace with error
 
-      if response.metadata.code == 204
-        @onFirehose()
-        return callback null, opts
-      callback false
+      if response.metadata.code != 204
+        return callback false
+
+      @onFirehose (error) =>
+        return callback error if error?
+        callback null, opts
 
   # internals
   _sendError: ({request, response}) =>
