@@ -1,7 +1,0 @@
-<message
-    to='romeo@example.net'
-    from='juliet@example.com/balcony'
-    type='chat'
-    xml:lang='en'>
-  <body>Wherefore art thou, Romeo?</body>
-</message>
