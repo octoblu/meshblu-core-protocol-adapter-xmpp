@@ -85,6 +85,7 @@ class XmppHandler
   # internals
   _sendError: ({request, response}) =>
     code = response.metadata.code
+    xmppError = http2xmpp code
 
     @client.send(new xmpp.Stanza('iq',
       type: 'error'
@@ -93,8 +94,8 @@ class XmppHandler
       id: request.attrs.id
     )
     .cnode(request.getChild('request')).up()
-    .c('error').attr('type', 'cancel')
-      .c(http2xmpp code).attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').up()
+    .c('error').attr('type', xmppError.type)
+      .c(xmppError.tag).attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').up()
       .c('text').attr('xmlns', 'urn:ietf:params:xml:ns:xmpp-stanzas').attr('xml:lang', 'en-US')
         .t(http.STATUS_CODES[code]).up()
       .c('response').attr('xmlns', 'meshblu-xmpp:job-manager:response')
