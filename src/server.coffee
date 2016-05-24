@@ -38,8 +38,8 @@ class Server
     @server.on 'error', @panic
 
     @jobManager = new RedisPooledJobManager {
-      jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-coap'
-      jobLogType: 'meshblu-core-protocol-adapter-coap:request'
+      jobLogIndexPrefix: 'metric:meshblu-core-protocol-adapter-xmpp'
+      jobLogType: 'meshblu-core-protocol-adapter-xmpp:request'
       @jobTimeoutSeconds
       @jobLogQueue
       @jobLogRedisUri

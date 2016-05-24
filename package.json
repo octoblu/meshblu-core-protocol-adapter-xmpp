@@ -1,6 +1,6 @@
 {
   "name": "meshblu-core-protocol-adapter-xmpp",
-  "version": "1.3.2",
+  "version": "",
   "description": "Meshblu Core Protocol Adapter for XMPP",
   "main": "index.js",
   "scripts": {
