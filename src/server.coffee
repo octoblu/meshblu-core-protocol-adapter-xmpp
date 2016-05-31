@@ -49,7 +49,7 @@ class Server
       @namespace
     }
 
-    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri)
+    uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri, dropBufferSupport: true)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
     @hydrantManagerFactory = new HydrantManagerFactory {@redisUri, uuidAliasResolver, namespace: @firehoseNamespace}
 

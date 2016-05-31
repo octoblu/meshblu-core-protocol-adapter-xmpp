@@ -10,8 +10,9 @@ MeshbluXmpp = require 'meshblu-xmpp'
 class Connect
   constructor: ({@redisUri}={}) ->
     @jobManager = new JobManager
-      client: new RedisNS 'ns', redis.createClient(@redisUri)
+      client: new RedisNS 'ns', redis.createClient(@redisUri, dropBufferSupport: true)
       timeoutSeconds: 10
+      jobLogSampleRate: 0
 
   connect: (callback) =>
     async.series [
@@ -25,8 +26,9 @@ class Connect
         connection: @connection
         device: {uuid: 'masseuse', token: 'assassin'}
         jobManager: new JobManager
-          client: new RedisNS 'ns', redis.createClient(@redisId)
+          client: new RedisNS 'ns', redis.createClient(@redisId, dropBufferSupport: true)
           timeoutSeconds: 10
+          jobLogSampleRate: 0
 
   shutItDown: (callback) =>
     @connection.close()
