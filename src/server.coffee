@@ -12,10 +12,20 @@ XmppHandler           = require './xmpp-handler'
 
 class Server
   constructor: (options)->
-    {@disableLogging, @port, @aliasServerUri} = options
-    {@redisUri, @namespace, @jobTimeoutSeconds} = options
-    {@maxConnections, @firehoseNamespace} = options
-    {@jobLogRedisUri, @jobLogQueue, @jobLogSampleRate} = options
+    {
+      @disableLogging
+      @port
+      @aliasServerUri
+      @redisUri
+      @firehoseRedisUri
+      @namespace
+      @jobTimeoutSeconds
+      @maxConnections
+      @firehoseNamespace
+      @jobLogRedisUri
+      @jobLogQueue
+      @jobLogSampleRate
+    } = options
     @panic 'missing @jobLogQueue', 2 unless @jobLogQueue?
     @panic 'missing @jobLogRedisUri', 2 unless @jobLogRedisUri?
     @panic 'missing @jobLogSampleRate', 2 unless @jobLogSampleRate?
@@ -51,7 +61,7 @@ class Server
 
     uuidAliasClient = new RedisNS 'uuid-alias', redis.createClient(@redisUri, dropBufferSupport: true)
     uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    @hydrantManagerFactory = new HydrantManagerFactory {@redisUri, uuidAliasResolver, namespace: @firehoseNamespace}
+    @hydrantManagerFactory = new HydrantManagerFactory {uuidAliasResolver, namespace: @firehoseNamespace, redisUri: @firehoseRedisUri}
 
     @server.on 'connection', @onConnection
     @server.on 'listening', callback
