@@ -7,6 +7,7 @@ describe 'on: message', ->
   beforeEach (done) ->
     client = new RedisNS 'ns', redis.createClient(dropBufferSupport: true)
     client.del 'request:queue', done
+    return # promises
 
   beforeEach ->
     @firehose = new RedisNS 'messages', redis.createClient(dropBufferSupport: true)
@@ -35,6 +36,7 @@ describe 'on: message', ->
       rawData: '{"nonce": "nonce"}'
     }
     @firehose.publish 'masseuse', JSON.stringify message
+    return # promises
 
   it 'should have a message', ->
     expectedMessage =

@@ -29,6 +29,7 @@ class Connect
           client: new RedisNS 'ns', redis.createClient(@redisId, dropBufferSupport: true)
           timeoutSeconds: 10
           jobLogSampleRate: 0
+    return # promises
 
   shutItDown: (callback) =>
     @connection.close()

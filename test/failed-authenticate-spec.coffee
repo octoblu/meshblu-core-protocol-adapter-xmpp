@@ -8,6 +8,7 @@ describe 'on: failed authenticate', ->
   beforeEach (done) ->
     client = new RedisNS 'ns', redis.createClient(dropBufferSupport: true)
     client.del 'request:queue', done
+    return # promises
 
   beforeEach 'on connect', (done) ->
     @connect = new Connect
