@@ -1,6 +1,6 @@
 {
   "name": "meshblu-core-protocol-adapter-xmpp",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "Meshblu Core Protocol Adapter for XMPP",
   "main": "index.js",
   "scripts": {
@@ -47,7 +47,7 @@
     "jsontoxml": "0.0.11",
     "lodash": "^4.16.4",
     "ltx": "^2.5.0",
-    "meshblu-core-manager-hydrant": "^1.7.0",
+    "meshblu-core-manager-hydrant": "^1.7.1",
     "meshblu-core-redis-pooled-job-manager": "^2.5.0",
     "meshblu-uuid-alias-resolver": "^1.0.3",
     "node-xmpp-server": "^2.2.2",
