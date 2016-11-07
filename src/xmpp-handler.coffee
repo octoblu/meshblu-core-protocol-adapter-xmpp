@@ -9,19 +9,21 @@ xml2js    = require('xml2js').parseString
 http2xmpp = require './helpers/http2xmpp'
 
 class XmppHandler
-  constructor: ({@client, @jobManager, @hydrantManagerFactory}) ->
+  constructor: ({@client, @jobManager, @hydrant}) ->
+
   initialize: =>
     @client.on 'authenticate', @onAuthenticate
     @client.on 'stanza', @onStanza
     @client.on 'close', @onClose
 
-  onClose: =>
-    @firehose?.close()
+  onClose: (callback=_.noop) =>
+    return callback() unless @uuid?
+    @hydrant.off "message:#{@uuid}", @onMessage
+    @hydrant?.unsubscribe { @uuid }, callback
 
   onFirehose: (callback) =>
-    @firehose = @hydrantManagerFactory.build()
-    @firehose.on 'message', @onMessage
-    @firehose.connect uuid: @auth.uuid, callback
+    @hydrant.on "message:#{@uuid}", @onMessage
+    @hydrant.subscribe { @uuid }, callback
 
   onMessage: (message) =>
     if message.metadata?.route?
@@ -78,6 +80,7 @@ class XmppHandler
       if response.metadata.code != 204
         return callback false
 
+      @uuid = @auth.uuid
       @onFirehose (error) =>
         return callback error if error?
         callback null, opts
