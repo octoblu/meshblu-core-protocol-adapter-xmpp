@@ -56,7 +56,7 @@ class XmppHandler
       delete job.metadata.responseId
       job.rawData = request.getChild('request').getChild('rawData')?.getText()
 
-      @jobManager.do 'request', 'response', job, (error, response) =>
+      @jobManager.do job, (error, response) =>
         return if error?
         return @_sendError {request, response} unless response.metadata.code < 400
         return @_sendResponse {request, response}
@@ -73,7 +73,7 @@ class XmppHandler
         auth: @auth
         jobType: 'Authenticate'
 
-    @jobManager.do 'request', 'response', request, (error, response) =>
+    @jobManager.do request, (error, response) =>
       return callback error if error?
       return callback false unless response? # replace with error
 

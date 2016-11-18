@@ -1,15 +1,9 @@
 _           = require 'lodash'
 Connect     = require './connect'
 MeshbluXmpp = require 'meshblu-xmpp'
-redis       = require 'ioredis'
 RedisNS     = require '@octoblu/redis-ns'
 
 describe 'on: failed authenticate', ->
-  beforeEach (done) ->
-    client = new RedisNS 'ns', redis.createClient(dropBufferSupport: true)
-    client.del 'request:queue', done
-    return # promises
-
   beforeEach 'on connect', (done) ->
     @connect = new Connect
     @connect.connect (error, things) =>
@@ -30,15 +24,12 @@ describe 'on: failed authenticate', ->
     badClient.connect (@error) =>
       done()
 
-    @jobManager.getRequest ['request'], (error, request) =>
-      return callback error if error?
-
+    @jobManager.do (request, callback) =>
       response =
         metadata:
           responseId: request.metadata.responseId
           code: 403
-
-      @jobManager.createResponse 'response', response, =>
+      callback null, response
 
   it 'should have an error', ->
     expect(@error).to.exist

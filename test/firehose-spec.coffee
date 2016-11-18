@@ -1,16 +1,11 @@
 _       = require 'lodash'
 Connect = require './connect'
-redis   = require 'ioredis'
+Redis   = require 'ioredis'
 RedisNS = require '@octoblu/redis-ns'
 
 describe 'on: message', ->
-  beforeEach (done) ->
-    client = new RedisNS 'ns', redis.createClient(dropBufferSupport: true)
-    client.del 'request:queue', done
-    return # promises
-
   beforeEach ->
-    @firehose = new RedisNS 'messages', redis.createClient(dropBufferSupport: true)
+    @firehose = new RedisNS 'messages', new Redis 'localhost', dropBufferSupport: true
 
   beforeEach 'on connect', (done) ->
     @connect = new Connect
