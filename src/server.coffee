@@ -95,6 +95,7 @@ class Server
     @server.on 'listening', callback
 
   stop: (callback) =>
+    @jobManager?.stopProcessing()
     @server.end callback
 
   onConnection: (client) =>
