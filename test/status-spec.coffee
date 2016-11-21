@@ -9,8 +9,7 @@ describe 'on: status', ->
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things
-      @connection.connection.on 'online', =>
-        done()
+      done()
 
   afterEach (done) ->
     @connect.shutItDown done

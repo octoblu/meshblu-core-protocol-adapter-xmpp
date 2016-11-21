@@ -12,9 +12,13 @@ class Connect
     queueId = UUID.v4()
     @requestQueueName = "test:request:queue:#{queueId}"
     @responseQueueName = "test:response:queue:#{queueId}"
+    @namespace = 'ns'
+    @redisUri = 'redis://localhost'
+
     @jobManager = new JobManagerResponder {
-      client: new RedisNS 'ns', new Redis @redisUri, dropBufferSupport: true
-      queueClient: new RedisNS 'ns', new Redis @redisUri, dropBufferSupport: true
+      @namespace
+      @redisUri
+      maxConnections: 1
       jobTimeoutSeconds: 10
       queueTimeoutSeconds: 10
       jobLogSampleRate: 0
@@ -24,29 +28,49 @@ class Connect
 
   connect: (callback) =>
     async.series [
+      @startJobManager
       @startServer
       @createConnection
-      @authenticateConnection
     ], (error) =>
       return callback error if error?
-      callback null,
-        sut: @sut
-        connection: @connection
-        device: {uuid: 'masseuse', token: 'assassin'}
-        jobManager: new JobManagerResponder {
-          client: new RedisNS 'ns', new Redis @redisId, dropBufferSupport: true
-          queueClient: new RedisNS 'ns', new Redis @redisId, dropBufferSupport: true
-          jobTimeoutSeconds: 10
-          queueTimeoutSeconds: 10
-          jobLogSampleRate: 0
-          @requestQueueName
-          @responseQueueName
+
+      jobManager = new JobManagerResponder {
+        @namespace
+        @redisUri
+        maxConnections: 1
+        jobTimeoutSeconds: 10
+        queueTimeoutSeconds: 10
+        jobLogSampleRate: 0
+        @requestQueueName
+        @responseQueueName
+      }
+
+      jobManager.start (error) =>
+        return callback error if error?
+        callback null, {
+          @sut
+          @connection
+          jobManager
+          device: {uuid: 'masseuse', token: 'assassin'}
         }
-    return # promises
+      return # promises
 
   shutItDown: (callback) =>
     @connection.close()
-    @sut.stop callback
+    @jobManager.stop =>
+      @sut.stop callback
+
+  startJobManager: (callback) =>
+    @jobManager.do (@request, next) =>
+      return callback new Error 'Invalid Response' unless @request?
+      response =
+        metadata:
+          responseId: @request.metadata.responseId
+          code: 204
+
+      next null, response
+
+    @jobManager.start callback
 
   startServer: (callback) =>
     @sut = new Server {
@@ -55,11 +79,11 @@ class Connect
       jobLogQueue: 'sample-rate:1.00'
       jobLogSampleRate: '0.00'
       maxConnections: 100
-      jobLogRedisUri: 'redis://localhost:6379'
-      redisUri: 'redis://localhost:6379'
-      cacheRedisUri: 'redis://localhost:6379'
-      firehoseRedisUri: 'redis://localhost:6379'
-      namespace: 'ns'
+      jobLogRedisUri: @redisUri
+      redisUri: @redisUri
+      cacheRedisUri: @redisUri
+      firehoseRedisUri: @redisUri
+      namespace: @namespace
       firehoseNamespace: 'messages'
       @requestQueueName
       @responseQueueName
@@ -76,19 +100,6 @@ class Connect
 
     @connection.connect (error) =>
       throw error if error?
-    callback()
-
-  authenticateConnection: (callback) =>
-    @jobManager.getRequest (error, @request) =>
-      return callback error if error?
-
-      return callback new Error 'Invalid Response' unless @request?
-
-      response =
-        metadata:
-          responseId: @request.metadata.responseId
-          code: 204
-
-      @jobManager.createResponse response, callback
+      callback()
 
 module.exports = Connect

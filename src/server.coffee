@@ -49,15 +49,6 @@ class Server
     process.exit exitCode
 
   run: (callback) =>
-    @server = new xmpp.C2S.TCPServer
-      domain: 'meshblu.octoblu.com'
-      port: @port
-
-    @server.on 'error', @panic
-
-    client = new RedisNS @namespace, new Redis @redisUri, dropBufferSupport: true
-    queueClient = new RedisNS @namespace, new Redis @redisUri, dropBufferSupport: true
-
     jobLogger = new JobLogger
       client: new Redis @jobLogRedisUri, dropBufferSupport: true
       indexPrefix: 'metric:meshblu-core-protocol-adapter-xmpp'
@@ -65,14 +56,18 @@ class Server
       jobLogQueue: @jobLogQueue
 
     @jobManager = new JobManagerRequester {
-      client
-      queueClient
+      @namespace
+      @redisUri
+      maxConnections: 2
       @jobTimeoutSeconds
       @jobLogSampleRate
       @requestQueueName
       @responseQueueName
       queueTimeoutSeconds: @jobTimeoutSeconds
     }
+
+    @jobManager.once 'error', (error) =>
+      @panic 'fatal job manager error', 1, error
 
     @jobManager._do = @jobManager.do
     @jobManager.do = (request, callback) =>
@@ -81,22 +76,29 @@ class Server
           return callback jobLoggerError if jobLoggerError?
           callback error, response
 
-    queueClient.on 'ready', =>
-      @jobManager.startProcessing()
+    @jobManager.start (error) =>
+      return callback error if error?
 
-    uuidAliasClient = new RedisNS 'uuid-alias', new Redis @cacheRedisUri, dropBufferSupport: true
-    uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
-    hydrantClient = new RedisNS @firehoseNamespace, new Redis @firehoseRedisUri, dropBufferSupport: true
-    @hydrant = new MultiHydrantFactory {client: hydrantClient, uuidAliasResolver}
-    @hydrant.connect (error) =>
-      return callback(error) if error?
+      uuidAliasClient = new RedisNS 'uuid-alias', new Redis @cacheRedisUri, dropBufferSupport: true
+      uuidAliasResolver = new UuidAliasResolver client: uuidAliasClient
+      hydrantClient = new RedisNS @firehoseNamespace, new Redis @firehoseRedisUri, dropBufferSupport: true
+      @hydrant = new MultiHydrantFactory {client: hydrantClient, uuidAliasResolver}
+      @hydrant.connect (error) =>
+        return callback(error) if error?
 
-    @server.on 'connection', @onConnection
-    @server.on 'listening', callback
+        @server = new xmpp.C2S.TCPServer
+          domain: 'meshblu.octoblu.com'
+          port: @port
+
+        @server.on 'error', (error) =>
+          @panic 'fatal server error', 1, error
+
+        @server.on 'connection', @onConnection
+        @server.on 'listening', callback
 
   stop: (callback) =>
-    @jobManager?.stopProcessing()
-    @server.end callback
+    @jobManager.stop =>
+      @server.end callback
 
   onConnection: (client) =>
     xmppHandler = new XmppHandler {client, @jobManager, @hydrant}
