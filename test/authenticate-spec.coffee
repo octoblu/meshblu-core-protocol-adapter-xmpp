@@ -5,7 +5,8 @@ RedisNS = require '@octoblu/redis-ns'
 
 describe 'on: authenticate', ->
   beforeEach 'on connect', (done) ->
-    @connect = new Connect
+    @workerFunc = sinon.stub()
+    @connect = new Connect {@workerFunc}
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things

@@ -4,7 +4,8 @@ RedisNS = require '@octoblu/redis-ns'
 
 describe 'on: whoami', ->
   beforeEach 'on connect', (done) ->
-    @connect = new Connect
+    @workerFunc = sinon.stub()
+    @connect = new Connect {@workerFunc}
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things
@@ -14,21 +15,13 @@ describe 'on: whoami', ->
     @connect.shutItDown done
 
   beforeEach (done) ->
-    @connection.whoami (error, @whoami) =>
-      done()
-
-    @jobManager.do (@request, callback) =>
-      response =
-        metadata:
-          responseId: @request.metadata.responseId
-          code: 200
-        data:
-          uuid: 'some-uuid'
-      callback null, response
+    @workerFunc.yields null, metadata: {code: 204}, rawData: '{"uuid": "some-uuid"}'
+    @connection.whoami (error, @whoami) => done()
 
   it 'should have the correct request', ->
-    expect(@request.metadata.jobType).to.equal 'GetDevice'
-    expect(@request.metadata.toUuid).to.equal 'masseuse'
+    request = @workerFunc.firstCall.args[0]
+    expect(request.metadata.jobType).to.equal 'GetDevice'
+    expect(request.metadata.toUuid).to.equal 'masseuse'
 
   it 'should get a whoami', ->
     expect(@whoami).to.deep.equal uuid: 'some-uuid'

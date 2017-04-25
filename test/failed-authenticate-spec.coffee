@@ -5,7 +5,8 @@ RedisNS     = require '@octoblu/redis-ns'
 
 describe 'on: failed authenticate', ->
   beforeEach 'on connect', (done) ->
-    @connect = new Connect
+    @workerFunc = sinon.stub()
+    @connect = new Connect { @workerFunc }
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things
@@ -24,12 +25,9 @@ describe 'on: failed authenticate', ->
     badClient.connect (@error) =>
       done()
 
-    @jobManager.do (request, callback) =>
-      response =
-        metadata:
-          responseId: request.metadata.responseId
-          code: 403
-      callback null, response
+    @workerFunc.onFirstCall().yields null,       
+      metadata:
+        code: 403
 
   it 'should have an error', ->
     expect(@error).to.exist

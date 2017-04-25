@@ -8,7 +8,7 @@ MeshbluXmpp = require 'meshblu-xmpp'
 { JobManagerResponder } = require 'meshblu-core-job-manager'
 
 class Connect
-  constructor: ({@redisUri}={}) ->
+  constructor: ({@redisUri, @workerFunc}={}) ->
     queueId = UUID.v4()
     @requestQueueName = "test:request:queue:#{queueId}"
     @responseQueueName = "test:response:queue:#{queueId}"
@@ -24,6 +24,7 @@ class Connect
       jobLogSampleRate: 0
       @requestQueueName
       @responseQueueName
+      workerFunc: @_workerFunc
     }
 
   connect: (callback) =>
@@ -34,25 +35,12 @@ class Connect
     ], (error) =>
       return callback error if error?
 
-      jobManager = new JobManagerResponder {
-        @namespace
-        @redisUri
-        maxConnections: 1
-        jobTimeoutSeconds: 10
-        queueTimeoutSeconds: 10
-        jobLogSampleRate: 0
-        @requestQueueName
-        @responseQueueName
+      callback null, {
+        @sut
+        @connection
+        @jobManager
+        device: {uuid: 'masseuse', token: 'assassin'}
       }
-
-      jobManager.start (error) =>
-        return callback error if error?
-        callback null, {
-          @sut
-          @connection
-          jobManager
-          device: {uuid: 'masseuse', token: 'assassin'}
-        }
       return # promises
 
   shutItDown: (callback) =>
@@ -61,15 +49,6 @@ class Connect
       @sut.stop callback
 
   startJobManager: (callback) =>
-    @jobManager.do (@request, next) =>
-      return callback new Error 'Invalid Response' unless @request?
-      response =
-        metadata:
-          responseId: @request.metadata.responseId
-          code: 204
-
-      next null, response
-
     @jobManager.start callback
 
   startServer: (callback) =>
@@ -98,8 +77,12 @@ class Connect
       uuid: 'masseuse'
       token: 'assassin'
 
-    @connection.connect (error) =>
-      throw error if error?
-      callback()
+    @connection.connect callback
+
+  _workerFunc: (request, callback) =>
+    if _.get(request, 'metadata.jobType') == 'Authenticate' && _.get(request, 'metadata.auth.uuid') == 'masseuse'
+      return callback null, metadata: code: 204
+
+    @workerFunc request, callback
 
 module.exports = Connect

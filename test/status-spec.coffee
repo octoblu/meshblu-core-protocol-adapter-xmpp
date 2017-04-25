@@ -5,7 +5,8 @@ xml2js  = require('xml2js').parseString
 
 describe 'on: status', ->
   beforeEach 'on connect', (done) ->
-    @connect = new Connect
+    @workerFunc = sinon.stub()
+    @connect = new Connect {@workerFunc}
     @connect.connect (error, things) =>
       return done error if error?
       {@sut,@connection,@device,@jobManager} = things
@@ -16,39 +17,32 @@ describe 'on: status', ->
 
   describe 'when the job responds with a 200', ->
     beforeEach (done) ->
-      @connection.status (error, @status) =>
-        done error
+      @workerFunc.onFirstCall().yields null,
+        metadata:
+          code: 200
+        data:
+          online: true
 
-      @jobManager.do (@request, callback) =>
-        response =
-          metadata:
-            responseId: @request.metadata.responseId
-            code: 200
-          data:
-            online: true
-
-        callback null, response
+      @connection.status (error, @status) => done error
 
     it 'should have the correct jobType', ->
-      expect(@request.metadata.jobType).to.equal 'GetStatus'
+      request = @workerFunc.firstCall.args[0]
+      expect(request.metadata.jobType).to.equal 'GetStatus'
 
     it 'should get a status', ->
       expect(@status).to.deep.equal online: true
 
   describe 'when the job responds with a 504', ->
     beforeEach (done) ->
-      @connection.status (@error) =>
-        done()
+      @workerFunc.onFirstCall().yields null,
+        metadata:
+          code: 504
 
-      @jobManager.do (@request, callback) =>
-        response =
-          metadata:
-            responseId: @request.metadata.responseId
-            code: 504
-        callback null, response
+      @connection.status (@error) => done()
 
     it 'should have the correct jobType', ->
-      expect(@request.metadata.jobType).to.equal 'GetStatus'
+      request = @workerFunc.firstCall.args[0]
+      expect(request.metadata.jobType).to.equal 'GetStatus'
 
     it 'should yield a "Gateway Timeout" error', ->
       expect(=> throw @error).to.throw 'Gateway Timeout'
@@ -61,18 +55,15 @@ describe 'on: status', ->
 
   describe 'when the job responds with a 500', ->
     beforeEach (done) ->
+      @workerFunc.onFirstCall().yields null,
+        metadata:
+          code: 500
       @connection.status (@error) =>
         done()
 
-      @jobManager.do (@request, callback) =>
-        response =
-          metadata:
-            responseId: @request.metadata.responseId
-            code: 500
-        callback null, response
-
     it 'should have the correct jobType', ->
-      expect(@request.metadata.jobType).to.equal 'GetStatus'
+      request = @workerFunc.firstCall.args[0]
+      expect(request.metadata.jobType).to.equal 'GetStatus'
 
     it 'should yield a "Internal Server Error" error', ->
       expect(=> throw @error).to.throw 'Internal Server Error'

@@ -1,6 +1,6 @@
 {
   "name": "meshblu-core-protocol-adapter-xmpp",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Meshblu Core Protocol Adapter for XMPP",
   "main": "index.js",
   "scripts": {
@@ -30,11 +30,11 @@
     "coffee-script": "^1.11.1",
     "meshblu-xmpp": "^1.4.5",
     "mocha": "^3.1.2",
-    "mocha-multi": "^0.9.1",
+    "mocha-multi": "^0.11.0",
     "mocha-osx-reporter": "^0.1.2",
     "node-xmpp-client": "^3.1.0",
-    "nyc": "^9.0.1",
-    "sinon": "^1.17.6",
+    "nyc": "^10.2.0",
+    "sinon": "^2.1.0",
     "sinon-chai": "^2.8.0"
   },
   "dependencies": {
@@ -47,7 +47,7 @@
     "jsontoxml": "0.0.11",
     "lodash": "^4.17.2",
     "ltx": "^2.5.1",
-    "meshblu-core-job-manager": "^9.0.0",
+    "meshblu-core-job-manager": "^11.0.2",
     "meshblu-core-manager-hydrant": "^2.0.0",
     "meshblu-uuid-alias-resolver": "^1.0.3",
     "node-xmpp-server": "^2.2.3",
