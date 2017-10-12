@@ -14,7 +14,7 @@ class Command
       firehoseNamespace:            process.env.FIREHOSE_NAMESPACE ? 'messages'
       jobTimeoutSeconds:            parseInt(process.env.JOB_TIMEOUT_SECONDS ? 30)
       maxConnections:               parseInt(process.env.CONNECTION_POOL_MAX_CONNECTIONS ? 100)
-      disableLogging:               process.env.DISABLE_LOGGING == "true"
+      disableLogging:               (process.env.DISABLE_LOGGING ? 'true') == "true"
       jobLogRedisUri:               process.env.JOB_LOG_REDIS_URI ? process.env.REDIS_URI
       jobLogQueue:                  process.env.JOB_LOG_QUEUE ? 'sample-rate:1.00'
       jobLogSampleRate:             parseFloat(process.env.JOB_LOG_SAMPLE_RATE ? 0)
